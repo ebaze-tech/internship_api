@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import { pool } from "./config/db.config";
+import pool from "./config/db.config";
 import { router as authRoutes } from "./routes/auth.route";
 import { router as userRoutes } from "./routes/user.route";
 import { runSqlFile } from "./utils/sqlRunner";

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { query, validationResult } from "express-validator";
-import { pool } from "../config/db.config";
+import pool from "../config/db.config";
 
 interface updateParam {
   username?: string;
