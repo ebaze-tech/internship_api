@@ -1,2 +1,3 @@
 import { Pool } from "pg";
-export declare const pool: Pool;
+declare let pool: Pool;
+export default pool;

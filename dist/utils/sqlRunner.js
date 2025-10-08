@@ -15,13 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.runSqlFile = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const db_config_1 = require("../config/db.config");
+const db_config_1 = __importDefault(require("../config/db.config"));
 const runSqlFile = (filename) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const filePath = path_1.default.join(__dirname, `../sql/${filename}`);
         const sql = fs_1.default.readFileSync(filePath, "utf8");
         console.log(`Running SQL file: ${filename}...`);
-        yield db_config_1.pool.query(sql);
+        yield db_config_1.default.query(sql);
         console.log(`Successfully executed ${filename}`);
     }
     catch (error) {

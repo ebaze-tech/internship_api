@@ -8,10 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateUser = exports.getUsers = void 0;
 const express_validator_1 = require("express-validator");
-const db_config_1 = require("../config/db.config");
+const db_config_1 = __importDefault(require("../config/db.config"));
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
@@ -19,14 +22,14 @@ const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.status(400).json({ message: "Invalid credentials" });
     }
     try {
-        yield db_config_1.pool.query("BEGIN");
-        const existingUser = yield db_config_1.pool.query(`
+        yield db_config_1.default.query("BEGIN");
+        const existingUser = yield db_config_1.default.query(`
     SELECT username, email, age FROM users WHERE id = $1
     `, [id]);
         if (existingUser.rows.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }
-        const getUsersQuery = yield db_config_1.pool.query(`
+        const getUsersQuery = yield db_config_1.default.query(`
         SELECT id, username, email, age FROM users`);
         if (getUsersQuery.rows.length === 0) {
             return res.status(404).json({ message: "No users available" });
@@ -64,7 +67,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return res.status(400).json({ message: "No fields provided to update" });
     }
     try {
-        const existingUser = yield db_config_1.pool.query(`SELECT id FROM users WHERE id = $1`, [id]);
+        const existingUser = yield db_config_1.default.query(`SELECT id FROM users WHERE id = $1`, [id]);
         if (existingUser.rows.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -85,7 +88,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         AND id != $${idx}
       `;
             duplicateValues.push(id);
-            const duplicates = yield db_config_1.pool.query(duplicateQuery, duplicateValues);
+            const duplicates = yield db_config_1.default.query(duplicateQuery, duplicateValues);
             if (duplicates.rows.length > 0) {
                 const duplicateFields = duplicates.rows
                     .map((u) => {
@@ -117,7 +120,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
       WHERE id = $${index}
       RETURNING id, username, email, age
     `;
-        const result = yield db_config_1.pool.query(query, values);
+        const result = yield db_config_1.default.query(query, values);
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }

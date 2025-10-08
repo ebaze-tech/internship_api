@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.startServer = exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const db_config_1 = require("./config/db.config");
+const db_config_1 = __importDefault(require("./config/db.config"));
 const auth_route_1 = require("./routes/auth.route");
 const user_route_1 = require("./routes/user.route");
 const sqlRunner_1 = require("./utils/sqlRunner");
@@ -31,7 +31,7 @@ exports.app.get("/", (req, res) => {
 });
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield db_config_1.pool.connect();
+        yield db_config_1.default.connect();
         // await runSqlFile("drop_tables.sql");
         yield (0, sqlRunner_1.runSqlFile)("schema.sql");
         console.log("Connected to DB");

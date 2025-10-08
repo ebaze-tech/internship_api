@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateUser = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const db_config_1 = require("../config/db.config");
+const db_config_1 = __importDefault(require("../config/db.config"));
 const JWT_SECRET = process.env.JWT_SECRET;
 const authenticateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authHeader = req.headers.authorization;
@@ -25,7 +25,7 @@ const authenticateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, f
     try {
         const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
         const user = Object.assign(Object.assign({}, decoded), { id: String(decoded.id), username: String(decoded.username), email: String(decoded.email) });
-        const searchUserQuery = yield db_config_1.pool.query(`
+        const searchUserQuery = yield db_config_1.default.query(`
     SELECT id FROM users WHERE username = $1
     `, [user.username]);
         if (searchUserQuery.rows.length > 0) {

@@ -16,7 +16,7 @@ exports.login = exports.register = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const uuid_1 = require("uuid");
-const db_config_1 = require("../config/db.config");
+const db_config_1 = __importDefault(require("../config/db.config"));
 const express_validator_1 = require("express-validator");
 const JWT_SECRET = process.env.JWT_SECRET;
 const CLIENT_URL = process.env.CLIENT_URL;
@@ -33,7 +33,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         !requestBody.password) {
         return res.status(400).json({ message: "Invalid credentials" });
     }
-    const client = yield db_config_1.pool.connect();
+    const client = yield db_config_1.default.connect();
     try {
         yield client.query("BEGIN");
         const existingUser = yield client.query(`SELECT * FROM users WHERE email = $1`, [requestBody.email]);
@@ -86,7 +86,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.status(400).json({ message: "Invalid credentials" });
     }
     try {
-        const existingUserQuery = yield db_config_1.pool.query(`
+        const existingUserQuery = yield db_config_1.default.query(`
         SELECT * FROM users WHERE username = $1`, [requestBody.username]);
         const existingUser = existingUserQuery.rows[0];
         if (!existingUser) {
