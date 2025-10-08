@@ -17,25 +17,31 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const db_config_1 = require("./config/db.config");
 const auth_route_1 = require("./routes/auth.route");
+const user_route_1 = require("./routes/user.route");
+const sqlRunner_1 = require("./utils/sqlRunner");
 exports.app = (0, express_1.default)();
 const PORT = process.env.PORT;
 const allowedOrigins = process.env.CLIENT_URL;
 exports.app.use((0, cors_1.default)({ origin: allowedOrigins, credentials: true }));
 exports.app.use(express_1.default.json());
 exports.app.use("/auth", auth_route_1.router);
+exports.app.use("/users", user_route_1.router);
 exports.app.get("/", (req, res) => {
     res.send("Server is running");
 });
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield db_config_1.pool.connect();
+        // await runSqlFile("drop_tables.sql");
+        yield (0, sqlRunner_1.runSqlFile)("schema.sql");
         console.log("Connected to DB");
         exports.app.listen(PORT, () => {
             console.log(`Server running on http://localhost:${PORT}`);
         });
     }
     catch (error) {
-        process.exit(1);
+        console.error(error);
+        // process.exit(1)
     }
 });
 exports.startServer = startServer;

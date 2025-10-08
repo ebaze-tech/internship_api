@@ -5,4 +5,5 @@ const express_1 = require("express");
 const auth_config_1 = require("../controllers/auth.config");
 exports.router = (0, express_1.Router)();
 exports.router.post("/register", auth_config_1.register);
+exports.router.post("/login", auth_config_1.login);
 //# sourceMappingURL=auth.route.js.map
