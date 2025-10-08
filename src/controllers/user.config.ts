@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { query, validationResult } from "express-validator";
 import pool from "../config/db.config";
 
-interface updateParam {
+interface requestParam {
   username?: string;
   email?: string;
   age?: string;
@@ -10,7 +10,7 @@ interface updateParam {
 export const getUsers = async (req: Request, res: Response) => {
   const id = req.user?.id;
   if (!id) {
-    return res.status(400).json({ message: "Invalid credentials" });
+    return res.status(400).json({ message: "Invalid request" });
   }
 
   try {
@@ -48,18 +48,81 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
+export const getUserByUniqueQuery = async (req: Request, res: Response) => {
+  const id = req.user?.id;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res
+      .status(400)
+      .json({ message: "Invalid request", errors: errors.array() });
+  }
+
+  try {
+    const { filterType, value } = req.params;
+
+    const allowedFilters = ["email", "username", "age"];
+
+    if (!allowedFilters.includes(filterType)) {
+      return res.status(400).json({
+        message: "Invalid filter. Use one of: email, username, or age.",
+      });
+    }
+    //   if (!id && (requestBody.age || requestBody.email || requestBody.username)) {
+    //     return res
+    //       .status(400)
+    //       .json({ message: "Invalid request", errors: errors.array() });
+    //   }
+
+    const existingUserQuery = await pool.query(
+      `
+    SELECT id, username, email, age FROM users WHERE id = $1
+    `,
+      [id]
+    );
+
+    if (existingUserQuery.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const result = await pool.query(
+      `SELECT id, username, email, age FROM users WHERE ${filterType} = $1`,
+      [value]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "User fetched successfully",
+      user: result.rows.map((user) => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        age: user.age,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const updateUser = async (req: Request, res: Response) => {
   const id = req.user?.id;
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: "Invalid credentials" });
+    return res
+      .status(400)
+      .json({ message: "Invalid request", errors: errors.array() });
   }
 
-  const requestBody: updateParam = req.body;
+  const requestBody: requestParam = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: "Invalid credentials" });
+    return res.status(400).json({ message: "Invalid request" });
   }
 
   if (!Object.keys(requestBody).length) {
@@ -149,6 +212,40 @@ export const updateUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error updating user:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const deleteUser = async (req: Request, res: Response) => {
+  const id = req.user?.id;
+  const { userId } = req.params;
+  if (!id && !userId) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+
+  try {
+    const existingUserQuery = await pool.query(
+      `
+    SELECT id, username, email, age FROM users WHERE id = $1
+    `,
+      [id]
+    );
+    if (existingUserQuery.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const deleteUserQuery = await pool.query(
+      `
+    DELETE FROM users WHERE id = $1 RETURNING *
+    `,
+      [userId]
+    );
+    return res.status(200).json({
+      message: "User deleted successfully",
+      user: deleteUserQuery.rows[0],
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
