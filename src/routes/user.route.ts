@@ -6,3 +6,4 @@ export const router = Router();
 
 router.get("/all", authenticateUser, getUsers);
 router.put("/update/:id", authenticateUser, updateUser);
+// routere
